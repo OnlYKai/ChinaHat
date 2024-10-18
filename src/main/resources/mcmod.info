@@ -1,0 +1,16 @@
+[
+{
+  "modid": "chinahat",
+  "name": "ChinaHat",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Kai"],
+  "credits": "Your mom",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
