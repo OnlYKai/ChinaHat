@@ -1,7 +1,9 @@
 package com.kai.chinahat;
 
+import com.kai.chinahat.utils.PartyGetter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -12,7 +14,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import static com.kai.chinahat.Settings.hat;
 
-@Mod(modid = "chinahat", name = "ChinaHat", version = "1.0")
+@Mod(modid = "chinahat", name = "ChinaHat", version = "1.1")
 public class ChinaHatMod {
 
 	@Mod.EventHandler
@@ -44,6 +46,13 @@ public class ChinaHatMod {
 			openGUI = false;
 			Minecraft.getMinecraft().displayGuiScreen(new SettingsGUI());
 		}
+	}
+
+	// Chat (for party info)
+	private final PartyGetter partyGetter = new PartyGetter();
+	@SubscribeEvent
+	public void onChatReceived(ClientChatReceivedEvent event) {
+		partyGetter.onChatEvent(event.message.getUnformattedText());
 	}
 
 }

@@ -1,9 +1,11 @@
 package com.kai.chinahat;
 
 import net.minecraft.client.gui.*;
+import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiResponder {
 
@@ -38,6 +40,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 	private GuiButton button24;
 	private GuiButton button25;
+	private GuiButton button26;
+	private GuiButton button27;
 
 	@Override
 	public void initGui() {
@@ -161,10 +165,14 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 
 
-		// Toggle on_others
+		// Cycle on_others
 		button24 = new GuiButton(24, x_left, this.height / 10,this.width /5, 20, button24text());
-		// Togglen on_self
+		// Toggle on_self
 		button25 = new GuiButton(25, x_right, this.height / 10,this.width /5, 20, button25text());
+		// Toggle offset
+		button26 = new GuiButton(26, x_left, this.height / 10 - 30,this.width /5, 20, button26text());
+		// Toggle tilt
+		button27 = new GuiButton(27, x_right, this.height / 10 - 30,this.width /5, 20, button27text());
 
 
 
@@ -244,6 +252,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 		this.buttonList.add(button24);
 		this.buttonList.add(button25);
+		this.buttonList.add(button26);
+		this.buttonList.add(button27);
 	}
 
 
@@ -261,6 +271,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 		this.buttonList.add(button24);
 		this.buttonList.add(button25);
+		this.buttonList.add(button26);
+		this.buttonList.add(button27);
 
 		if (category == 1) {
 			this.buttonList.add(button7);
@@ -322,10 +334,16 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 	}
 
 	private String button24text() {
-		return Settings.on_others ? "On Others: ON" : "On Others: OFF";
+		return "On Others: " + Settings.on_others;
 	}
 	private String button25text() {
 		return Settings.on_self ? "On Self: ON" : "On Self: OFF";
+	}
+	private String button26text() {
+		return "Offset: " + Settings.offset;
+	}
+	private String button27text() {
+		return Settings.tilt ? "Tilt: ON" : "Tilt: OFF";
 	}
 
 
@@ -415,7 +433,23 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 				button19.displayString = button19text();
 				break;
 			case 24:
-				Settings.on_others = !Settings.on_others;
+				switch (Settings.on_others) {
+					case "None":
+						Settings.on_others = "Custom";
+						break;
+					case "Custom":
+						Settings.on_others = "Party";
+						break;
+					case "Party":
+						Settings.on_others = "Custom+Party";
+						break;
+					case "Custom+Party":
+						Settings.on_others = "All";
+						break;
+					case "All":
+						Settings.on_others = "None";
+						break;
+				}
 				ConfigHandler.saveConfig();
 				button24.displayString = button24text();
 				break;
@@ -423,6 +457,29 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 				Settings.on_self = !Settings.on_self;
 				ConfigHandler.saveConfig();
 				button25.displayString = button25text();
+				break;
+			case 26:
+				switch (Settings.offset) {
+					case "Everyone":
+						Settings.offset = "Others";
+						break;
+					case "Others":
+						Settings.offset = "Self";
+						break;
+					case "Self":
+						Settings.offset = "Nobody";
+						break;
+					case "Nobody":
+						Settings.offset = "Everyone";
+						break;
+				}
+				ConfigHandler.saveConfig();
+				button26.displayString = button26text();
+				break;
+			case 27:
+				Settings.tilt = !Settings.tilt;
+				ConfigHandler.saveConfig();
+				button27.displayString = button27text();
 				break;
 		}
 	}
@@ -463,10 +520,16 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+		if (typedChar == '#')
+			return;
+
 		super.keyTyped(typedChar, keyCode);
 
 		// Allow typing into the text field
 		if (category == 1 && text11.isFocused()) {
+			// If Ctrl+V and first character of the clipboard text is '#' empty textfield
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text11);
 			// Let key go to textfield if conditions met
 			text11.textboxKeyTyped(typedChar, keyCode);
 			// Check if the first character is a '#' and if not set it to one
@@ -479,6 +542,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 			}
 		}
 		if (category == 1 && text12.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text12);
 			text12.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text12);
 			String text = text12.getText();
@@ -488,6 +553,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 			}
 		}
 		if (category == 1 && text13.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text13);
 			text13.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text13);
 			String text = text13.getText();
@@ -500,6 +567,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 
 		if (category == 2 && text16.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text16);
 			text16.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text16);
 			String text = text16.getText();
@@ -509,6 +578,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 			}
 		}
 		if (category == 2 && text17.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text17);
 			text17.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text17);
 			String text = text17.getText();
@@ -518,6 +589,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 			}
 		}
 		if (category == 2 && text18.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text18);
 			text18.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text18);
 			String text = text18.getText();
@@ -530,6 +603,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 
 
 		if (category == 3 && text21.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text21);
 			text21.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text21);
 			String text = text21.getText();
@@ -539,6 +614,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 			}
 		}
 		if (category == 3 && text22.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text22);
 			text22.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text22);
 			String text = text22.getText();
@@ -548,6 +625,8 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 			}
 		}
 		if (category == 3 && text23.isFocused()) {
+			if ((isCtrlKeyDown()) && keyCode == Keyboard.KEY_V)
+				checkClipboard(text23);
 			text23.textboxKeyTyped(typedChar, keyCode);
 			checkFirstChar(text23);
 			String text = text23.getText();
@@ -556,6 +635,14 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 				ConfigHandler.saveConfig();
 			}
 		}
+	}
+
+	// Check if clipboard text starts with a '#'
+	private void checkClipboard(GuiTextField field) {
+		String clipboardText = getClipboardString();
+		if (!clipboardText.isEmpty())
+			if (clipboardText.charAt(0) == '#')
+				field.setText("");
 	}
 
 	// Check for "#"
@@ -609,17 +696,21 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 		super.drawScreen(mouseX, mouseY, partialTicks);
 
 
-		// Check if mouse is over slider1
-		if (isMouseOverSlider(slider1, mouseX, mouseY)) {
-			// Draw tooltip
+		// slider1 tooltip (speed)
+		if (isMouseOverSlider(slider1, mouseX, mouseY))
 			drawHoveringText(Arrays.asList("Speed (Rainbow/Gradient)", "Lower = Faster"), mouseX, mouseY);
-		}
 
-		// Check if mouse is over slider3
-		if (isMouseOverSlider(slider3, mouseX, mouseY)) {
-			// Draw tooltip
+		// slider3 tooltip (saturation)
+		if (isMouseOverSlider(slider3, mouseX, mouseY))
 			drawHoveringText(Arrays.asList("Saturation (Rainbow only)", "0 = Grayscale"), mouseX, mouseY);
-		}
+
+		// button26 tooltip (offset)
+		if (isMouseOverButton(button26, mouseX, mouseY))
+			drawHoveringText(Arrays.asList("Offset hat depending on if helmet/skull/block is worn on head.", "The offset itself is automatic! This setting only decides to whom to apply it."), mouseX, mouseY);
+
+		// button27 tooltip (tilt)
+		if (isMouseOverButton(button27, mouseX, mouseY))
+			drawHoveringText(Collections.singletonList("Tilt hat with head"), mouseX, mouseY);
 
 
 		// Draw info text
@@ -650,6 +741,12 @@ public class SettingsGUI extends GuiScreen implements GuiPageButtonList.GuiRespo
 	private boolean isMouseOverSlider(GuiSlider slider, int mouseX, int mouseY) {
 		return mouseX >= slider.xPosition && mouseX <= slider.xPosition + slider.width &&
 		mouseY >= slider.yPosition && mouseY <= slider.yPosition + slider.height;
+	}
+
+	// Helper method to check if the mouse is over a button
+	private boolean isMouseOverButton(GuiButton button, int mouseX, int mouseY) {
+		return mouseX >= button.xPosition && mouseX <= button.xPosition + button.width &&
+		mouseY >= button.yPosition && mouseY <= button.yPosition + button.height;
 	}
 
 

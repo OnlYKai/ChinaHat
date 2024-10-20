@@ -2,10 +2,10 @@
 {
   "modid": "chinahat",
   "name": "ChinaHat",
-  "description": "",
+  "description": "Adds china hat without cheats",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://github.com/OnlYKai/ChinaHat",
   "updateUrl": "",
   "authorList": ["Kai"],
   "credits": "Your mom",

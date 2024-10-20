@@ -29,8 +29,21 @@ public class ConfigHandler {
 							Settings.on_self = Boolean.parseBoolean(value);
 						break;
 					case "on_others":
-						if (value.equals("true") || value.equals("false"))
-							Settings.on_others = Boolean.parseBoolean(value);
+						if (value.equals("None") || value.equals("Custom") || value.equals("Party") || value.equals("Custom+Party") || value.equals("All"))
+							Settings.on_others = value;
+						break;
+					case "on_players":
+						if (!value.isEmpty()) {
+							String[] players = value.split(",");
+							for (String player : players) {
+								player = player.trim();
+								if (player.isEmpty())
+									continue;
+								if (Settings.on_players.contains(player))
+									continue;
+								Settings.on_players.add(player);
+							}
+						}
 						break;
 
 
@@ -44,6 +57,10 @@ public class ConfigHandler {
 						break;
 					case "saturation":
 						parseFloat(value, 0, 1).ifPresent(v -> Settings.saturation = v);
+						break;
+					case "offset":
+						if (value.equals("Everyone") || value.equals("Others") || value.equals("Self") || value.equals("Nobody"))
+							Settings.offset = value;
 						break;
 					case "tilt":
 						if (value.equals("true") || value.equals("false"))
@@ -146,13 +163,16 @@ public class ConfigHandler {
 					"// Main" +
 					"\nhat = " + Settings.hat + " // Main toggle" +
 					"\non_self = " + Settings.on_self + " // Render on self" +
-					"\non_others = " + Settings.on_others + " // Render on other players" +
+					"\non_others = " + Settings.on_others + " // None/Custom/Party/Custom+Party/All" +
+					"\n// List of players to render hat on (divided by \",\")" +
+					"\non_players = " + String.join(",", Settings.on_players) +
 
 					"\n\n// Misc" +
 					"\nfirst_person = " + Settings.first_person + " // Show hat in first person" +
 					"\nspeed = " + Settings.speed + " // Rainbow/Gradient only (smaller = faster) (only whole numbers, can't be 0)" +
 					"\nsaturation = " + Settings.saturation + " // Rainbow only (0.00 is 0%, 1.00 is 100%) (0 is grayscale)" +
-					"\ntilt = " + Settings.tilt + " // Hat tilt with head (Only accessible with \"/chinahat tilt\" or via config)" +
+					"\noffset = " + Settings.offset + " // Offset hat if helmets/skulls/blocks on head" +
+					"\ntilt = " + Settings.tilt + " // Tilt hat with head" +
 
 					"\n\n// Outline settings" +
 					"\noutline = " + Settings.outline + " // Main Outline toggle" +

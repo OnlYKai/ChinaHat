@@ -7,12 +7,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemSkull;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 
 import static com.kai.chinahat.Settings.*;
+import static com.kai.chinahat.utils.PartyGetter.inParty;
 
 public class ChinaHat {
 
@@ -20,9 +25,6 @@ public class ChinaHat {
 
 	public void onRender3DEvent(float partialTicks) {
 		if (mc.thePlayer == null || mc.theWorld == null)
-			return;
-
-		if(!first_person && mc.gameSettings.thirdPersonView == 0)
 			return;
 
 		double renderPosX = mc.getRenderManager().viewerPosX;
@@ -44,14 +46,41 @@ public class ChinaHat {
 			if (player.isDead || player.isInvisible())
 				continue;
 
+			ItemStack helmet = player.getCurrentArmor(3);
+
 			boolean self = player == mc.thePlayer;
-			double sneakOffset = player.isSneaking() ? 0.2 : 0;
+			double sneakOffset = player.isSneaking() ? 0.25 : 0;
+			double helmetOffset = 0;
+
+			if (offset.equals("Nobody") || offset.equals("Others") && self || offset.equals("Self") && !self || helmet == null)
+				helmetOffset = 0.01 + (tilt ? 0.02 : 0);
+			else if (helmet.getItem() instanceof ItemArmor)
+				helmetOffset = 0.07 + (tilt ? 0.02 : 0);
+			else if (helmet.getItem() instanceof ItemSkull)
+				helmetOffset = 0.11 + (tilt ? 0.03 : 0);
+			else if (helmet.getItem() instanceof ItemBlock)
+				helmetOffset = 0.07 + (tilt ? 0.02 : 0);
+
+
+
+			if (self && !first_person && mc.gameSettings.thirdPersonView == 0)
+				continue;
 
 			if (self && !on_self)
 				continue;
 
-			if (!self && !on_others)
-				continue;
+			if (!self) {
+				if (on_others.equals("None"))
+					continue;
+				else if (on_others.equals("Custom") && !on_players.contains(player.getName()))
+					continue;
+				else if (on_others.equals("Party") && !inParty.contains(player.getName()))
+					continue;
+				else if (on_others.equals("Custom+Party") && !on_players.contains(player.getName()) && !inParty.contains(player.getName()))
+					continue;
+			}
+
+
 
 			GL11.glPushMatrix();
 
@@ -68,13 +97,13 @@ public class ChinaHat {
 
 
 
-			GL11.glTranslated(posX, posY + height, posZ);
+			GL11.glTranslated(posX, posY + height + helmetOffset - sneakOffset, posZ);
 
 			GL11.glEnable(GL11.GL_LINE_SMOOTH);
 			GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
 
 			if (tilt) {
-				if (self) GL11.glRotated(yaw, 0, -1, 0);
+				GL11.glRotated(yaw, 0, -1, 0);
 				GL11.glRotated(pitch / 3.0, 1, 0, 0);
 				GL11.glTranslated(0, 0, pitch / 270.0);
 			}
@@ -83,20 +112,18 @@ public class ChinaHat {
 
 			// Draw hat top
 			GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			int color12 = getColorTop(4).getRGB();
-			RenderUtil.color(color12);
+			RenderUtil.color(getColorTop(4).getRGB());
+			GL11.glVertex3d(0, 0.3, 0);
 			// Draw hat bottom
-			GL11.glVertex3d(0, 0.3 - sneakOffset, 0);
 			for (int i = 0; i <= 180; i++) {
-				int color1 = getColorBottom(i * 4).getRGB();
-				RenderUtil.color(color1);
+				RenderUtil.color(getColorBottom(i * 4).getRGB());
 				GL11.glVertex3d(
 						-Math.sin(i * Math.PI * 2 / 90) * radius,
-						0 - sneakOffset,
+						0,
 						Math.cos(i * Math.PI * 2 / 90) * radius
 				);
 			}
-			GL11.glVertex3d(0, 0.3 - sneakOffset, 0);
+			GL11.glVertex3d(0, 0.3, 0);
 			GL11.glEnd();
 
 
@@ -106,11 +133,10 @@ public class ChinaHat {
 				// Draw outline
 				GL11.glBegin(GL11.GL_LINE_LOOP);
 				for (int i = 0; i <= 180; i++) {
-					int color1 = getColorOutline(i * 4).getRGB();
-					RenderUtil.color(color1);
+					RenderUtil.color(getColorOutline(i * 4).getRGB());
 					GL11.glVertex3d(
 							-Math.sin(i * Math.PI * 2 / 90) * radius,
-							0 - sneakOffset,
+							0,
 							Math.cos(i * Math.PI * 2 / 90) * radius
 					);
 				}
