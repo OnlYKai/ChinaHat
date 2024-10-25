@@ -135,11 +135,11 @@ public class PartyGetter {
 			else if (message.matches(PARTY_YOU_LEFT_PATTERN))
 				inParty.clear();
 
-				// You got kicked (clear)
+			// You got kicked (clear)
 			else if (message.matches(PARTY_YOU_KICKED_PATTERN))
 				inParty.clear();
 
-				// Player got kicked (remove)
+			// Player got kicked (remove)
 			else if (message.matches(PARTY_KICKED_PATTERN)) {
 				message = message.replaceAll(PARTY_KICKED_PATTERN, "$2");
 				if (inParty.contains(message))
