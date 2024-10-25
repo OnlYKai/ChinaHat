@@ -1,14 +1,19 @@
 package com.kai.chinahat;
 
+import com.kai.chinahat.utils.ApiUtil;
+
 import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class ConfigHandler {
 
-	public static void loadConfig() {
+	public static CompletableFuture<Void> loadConfig() {
+		List<CompletableFuture<Void>> uuidFutures = new ArrayList<>();
 		try {
 			List<String> lines = Files.readAllLines(Paths.get("config/ChinaHat.toml"));
 			for (String line : lines) {
@@ -32,16 +37,14 @@ public class ConfigHandler {
 						if (value.equals("None") || value.equals("Custom") || value.equals("Party") || value.equals("Custom+Party") || value.equals("All"))
 							Settings.on_others = value;
 						break;
-					case "on_players":
+					case "on_players_uuid":
 						if (!value.isEmpty()) {
-							String[] players = value.split(",");
-							for (String player : players) {
-								player = player.trim();
-								if (player.isEmpty())
+							String[] uuids = value.split(",");
+							for (String uuid : uuids) {
+								uuid = uuid.replace("-", "").trim().toLowerCase();
+								if (uuid.isEmpty() || Settings.on_players_uuid.contains(uuid))
 									continue;
-								if (Settings.on_players.contains(player))
-									continue;
-								Settings.on_players.add(player);
+								uuidFutures.add(ApiUtil.loadFromUUID(uuid));
 							}
 						}
 						break;
@@ -52,8 +55,11 @@ public class ConfigHandler {
 							Settings.first_person = Boolean.parseBoolean(value);
 						break;
 					case "speed":
-						try {Settings.speed = Math.max(1, (int) Math.abs(Math.round(Double.parseDouble(value))));}
-						catch (NumberFormatException e) {}
+						try {
+							Settings.speed = Math.max(1, (int) Math.abs(Math.round(Double.parseDouble(value))));
+						}
+						catch (NumberFormatException e) {
+						}
 						break;
 					case "saturation":
 						parseFloat(value, 0, 1).ifPresent(v -> Settings.saturation = v);
@@ -133,7 +139,7 @@ public class ConfigHandler {
 		catch (Exception e) {
 			System.out.println("[ChinaHat] Couldn't load config! Error: " + e.getMessage());
 		}
-		saveConfig();
+		return CompletableFuture.allOf(uuidFutures.toArray(new CompletableFuture[0])).thenRun(() -> saveConfig());
 	}
 
 	public static Optional<Float> parseFloat(String value, float minValue, float maxValue) {
@@ -165,13 +171,13 @@ public class ConfigHandler {
 					"\non_self = " + Settings.on_self + " // Render on self" +
 					"\non_others = " + Settings.on_others + " // None/Custom/Party/Custom+Party/All" +
 					"\n// List of players to render hat on (divided by \",\")" +
-					"\non_players = " + String.join(",", Settings.on_players) +
+					"\non_players_uuid = " + String.join(",", Settings.on_players_uuid) +
 
 					"\n\n// Misc" +
 					"\nfirst_person = " + Settings.first_person + " // Show hat in first person" +
 					"\nspeed = " + Settings.speed + " // Rainbow/Gradient only (smaller = faster) (only whole numbers, can't be 0)" +
 					"\nsaturation = " + Settings.saturation + " // Rainbow only (0.00 is 0%, 1.00 is 100%) (0 is grayscale)" +
-					"\noffset = " + Settings.offset + " // Offset hat if helmets/skulls/blocks on head" +
+					"\noffset = " + Settings.offset + " // Offset hat if helmets, skulls, blocks on head for Everyone/Others/Self/Nobody" +
 					"\ntilt = " + Settings.tilt + " // Tilt hat with head" +
 
 					"\n\n// Outline settings" +

@@ -72,11 +72,11 @@ public class ChinaHat {
 			if (!self) {
 				if (on_others.equals("None"))
 					continue;
-				else if (on_others.equals("Custom") && !on_players.contains(player.getName()))
+				else if (on_others.equals("Custom") && !on_players_name.contains(player.getName()))
 					continue;
 				else if (on_others.equals("Party") && !inParty.contains(player.getName()))
 					continue;
-				else if (on_others.equals("Custom+Party") && !on_players.contains(player.getName()) && !inParty.contains(player.getName()))
+				else if (on_others.equals("Custom+Party") && !on_players_name.contains(player.getName()) && !inParty.contains(player.getName()))
 					continue;
 			}
 

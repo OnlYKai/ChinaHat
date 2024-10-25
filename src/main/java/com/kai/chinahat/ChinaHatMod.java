@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import static com.kai.chinahat.Settings.hat;
 
-@Mod(modid = "chinahat", name = "ChinaHat", version = "1.1")
+@Mod(modid = "chinahat", name = "ChinaHat", version = "1.1.1")
 public class ChinaHatMod {
 
 	@Mod.EventHandler
