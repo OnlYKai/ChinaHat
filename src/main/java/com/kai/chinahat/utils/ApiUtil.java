@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 
 public class ApiUtil {
 
+	private static final JsonParser jsonParser = new JsonParser();
 	private static final ExecutorService executor = Executors.newCachedThreadPool();
 
 
@@ -158,7 +159,7 @@ public class ApiUtil {
 			reader.close();
 
 			// Return the JsonParser
-			return JsonParser.parseString(response.toString()).getAsJsonObject();
+			return jsonParser.parse(response.toString()).getAsJsonObject();
 		}
 		else if (responseCode == 404)
 			throw new IllegalArgumentException("not found!");
