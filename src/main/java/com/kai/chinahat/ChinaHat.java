@@ -43,10 +43,13 @@ public class ChinaHat {
 		OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 
 		for (EntityPlayer player : mc.theWorld.playerEntities) {
-			if (player.isDead || player.isInvisible())
+			if (player.isDead)
 				continue;
 
 			ItemStack helmet = player.getCurrentArmor(3);
+
+			if (player.isInvisible() && helmet == null)
+				continue;
 
 			boolean self = player == mc.thePlayer;
 			double sneakOffset = player.isSneaking() ? 0.25 : 0;
